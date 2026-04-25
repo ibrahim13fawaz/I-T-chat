@@ -9,13 +9,34 @@
     "messages": {
       "general": {
         ".read": "auth != null",
-        ".write": "auth != null"
+        ".write": "auth != null",
+        ".indexOn": ["timestamp"]
       }
     },
     "presence": {
       "$uid": {
         ".read": "auth != null",
         ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+    "voice_mics": {
+      "$slot": {
+        "$uid": {
+          ".read": "auth != null",
+          ".write": "auth != null && auth.uid === $uid"
+        }
+      }
+    },
+    "voice_signals": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null"
+      }
+    },
+    "uno_rooms": {
+      "$rid": {
+        ".read": "auth != null",
+        ".write": "auth != null"
       }
     }
   }
