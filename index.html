@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Hala Chat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ===================== SPLASH ===================== -->
+<div id="screen-splash" class="screen active">
+  <div class="splash-bg"></div>
+  <div class="splash-content">
+    <div class="logo-ring">
+      <div class="logo-inner">
+        <svg width="52" height="52" viewBox="0 0 52 52" fill="none">
+          <circle cx="26" cy="26" r="26" fill="url(#lg1)"/>
+          <path d="M14 20c0-2.2 1.8-4 4-4h16c2.2 0 4 1.8 4 4v10c0 2.2-1.8 4-4 4h-2l-4 4-4-4h-6c-2.2 0-4-1.8-4-4V20z" fill="white" fill-opacity=".9"/>
+          <circle cx="20" cy="25" r="2" fill="url(#lg1)"/>
+          <circle cx="26" cy="25" r="2" fill="url(#lg1)"/>
+          <circle cx="32" cy="25" r="2" fill="url(#lg1)"/>
+          <defs>
+            <linearGradient id="lg1" x1="0" y1="0" x2="52" y2="52" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#7C3AED"/>
+              <stop offset="1" stop-color="#EC4899"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+    </div>
+    <h1 class="app-title">هلا</h1>
+    <p class="app-tagline">تواصل، العب، واستمتع</p>
+    <button class="btn-primary btn-splash" onclick="showScreen('login')">ابدأ الآن</button>
+  </div>
+  <div class="splash-bubbles">
+    <div class="bubble b1"></div>
+    <div class="bubble b2"></div>
+    <div class="bubble b3"></div>
+    <div class="bubble b4"></div>
+  </div>
+</div>
+
+<!-- ===================== LOGIN ===================== -->
+<div id="screen-login" class="screen">
+  <div class="auth-header">
+    <div class="auth-logo">
+      <svg width="38" height="38" viewBox="0 0 52 52" fill="none">
+        <circle cx="26" cy="26" r="26" fill="url(#lg2)"/>
+        <path d="M14 20c0-2.2 1.8-4 4-4h16c2.2 0 4 1.8 4 4v10c0 2.2-1.8 4-4 4h-2l-4 4-4-4h-6c-2.2 0-4-1.8-4-4V20z" fill="white" fill-opacity=".9"/>
+        <circle cx="20" cy="25" r="2" fill="url(#lg2)"/>
+        <circle cx="26" cy="25" r="2" fill="url(#lg2)"/>
+        <circle cx="32" cy="25" r="2" fill="url(#lg2)"/>
+        <defs><linearGradient id="lg2" x1="0" y1="0" x2="52" y2="52" gradientUnits="userSpaceOnUse"><stop stop-color="#7C3AED"/><stop offset="1" stop-color="#EC4899"/></linearGradient></defs>
+      </svg>
+    </div>
+    <h2>مرحباً بعودتك 👋</h2>
+    <p>سجّل دخولك للمتابعة</p>
+  </div>
+  <div class="auth-card">
+    <div class="input-group">
+      <label>البريد الإلكتروني</label>
+      <div class="input-wrap">
+        <span class="inp-icon">✉️</span>
+        <input type="email" id="login-email" placeholder="example@email.com" />
+      </div>
+    </div>
+    <div class="input-group">
+      <label>كلمة المرور</label>
+      <div class="input-wrap">
+        <span class="inp-icon">🔒</span>
+        <input type="password" id="login-password" placeholder="••••••••" />
+      </div>
+    </div>
+    <div id="login-error" class="error-msg"></div>
+    <button class="btn-primary" onclick="doLogin()">تسجيل الدخول</button>
+    <div class="auth-divider"><span>أو</span></div>
+    <button class="btn-outline" onclick="showScreen('register')">إنشاء حساب جديد</button>
+  </div>
+</div>
+
+<!-- ===================== REGISTER ===================== -->
+<div id="screen-register" class="screen">
+  <div class="auth-header">
+    <button class="back-btn" onclick="showScreen('login')">←</button>
+    <h2>إنشاء حساب 🚀</h2>
+    <p>انضم إلى مجتمع هلا</p>
+  </div>
+  <div class="auth-card">
+    <div class="avatar-picker" onclick="document.getElementById('reg-avatar-input').click()">
+      <div class="avatar-preview" id="reg-avatar-preview">
+        <span>📷</span>
+      </div>
+      <p class="avatar-hint">اضغط لإضافة صورة</p>
+      <input type="file" id="reg-avatar-input" accept="image/*" style="display:none" onchange="previewAvatar(this)" />
+    </div>
+    <div class="input-group">
+      <label>اسم المستخدم</label>
+      <div class="input-wrap">
+        <span class="inp-icon">👤</span>
+        <input type="text" id="reg-name" placeholder="اسمك في التطبيق" />
+      </div>
+    </div>
+    <div class="input-group">
+      <label>البريد الإلكتروني</label>
+      <div class="input-wrap">
+        <span class="inp-icon">✉️</span>
+        <input type="email" id="reg-email" placeholder="example@email.com" />
+      </div>
+    </div>
+    <div class="input-group">
+      <label>كلمة المرور</label>
+      <div class="input-wrap">
+        <span class="inp-icon">🔒</span>
+        <input type="password" id="reg-password" placeholder="••••••••" />
+      </div>
+    </div>
+    <div id="reg-error" class="error-msg"></div>
+    <button class="btn-primary" onclick="doRegister()">إنشاء الحساب</button>
+  </div>
+</div>
+
+<!-- ===================== HOME ===================== -->
+<div id="screen-home" class="screen">
+  <div class="home-header">
+    <div class="user-greet">
+      <div class="user-avatar-sm" id="home-user-avatar"></div>
+      <div>
+        <p class="greet-sub">أهلاً،</p>
+        <p class="greet-name" id="home-user-name">مستخدم</p>
+      </div>
+    </div>
+    <div class="notif-btn">🔔</div>
+  </div>
+
+  <div class="home-body">
+    <div class="section-label">الغرف النشطة</div>
+    <div class="room-card" onclick="showScreen('chat')">
+      <div class="room-card-img">🌟</div>
+      <div class="room-card-info">
+        <div class="room-card-name">الغرفة العامة</div>
+        <div class="room-card-meta">
+          <span class="room-online-dot"></span>
+          <span id="home-members-count">0 عضو</span>
+        </div>
+      </div>
+      <div class="room-card-arrow">←</div>
+    </div>
+
+    <div class="section-label" style="margin-top:24px">مرحباً بك في هلا</div>
+    <div class="welcome-banner">
+      <div class="welcome-emoji">🎉</div>
+      <div>
+        <div class="welcome-title">استمتع بالدردشة والألعاب</div>
+        <div class="welcome-sub">تفاعل مع مجتمع هلا الرائع</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <button class="nav-btn active" onclick="switchTab('home')">
+      <span class="nav-icon">🏠</span>
+      <span class="nav-label">الرئيسية</span>
+    </button>
+    <button class="nav-btn" onclick="switchTab('games')">
+      <span class="nav-icon">🎮</span>
+      <span class="nav-label">الألعاب</span>
+    </button>
+    <button class="nav-btn" onclick="switchTab('profile')">
+      <span class="nav-icon">👤</span>
+      <span class="nav-label">بروفايل</span>
+    </button>
+  </div>
+</div>
+
+<!-- ===================== CHAT ===================== -->
+<div id="screen-chat" class="screen">
+  <div class="chat-header">
+    <div class="chat-header-info">
+      <div class="chat-room-img">🌟</div>
+      <div>
+        <div class="chat-room-name">الغرفة العامة</div>
+        <div class="chat-room-members"><span id="chat-members-count">0</span> عضو</div>
+      </div>
+    </div>
+    <button class="leave-btn" onclick="showScreen('home')">خروج ✕</button>
+  </div>
+
+  <!-- Mics -->
+  <div class="mics-bar">
+    <div class="mic-slot" id="mic-0"><div class="mic-avatar">🎤</div><div class="mic-label">مايك 1</div></div>
+    <div class="mic-slot" id="mic-1"><div class="mic-avatar">🎤</div><div class="mic-label">مايك 2</div></div>
+    <div class="mic-slot" id="mic-2"><div class="mic-avatar">🎤</div><div class="mic-label">مايك 3</div></div>
+    <div class="mic-slot" id="mic-3"><div class="mic-avatar">🎤</div><div class="mic-label">مايك 4</div></div>
+    <div class="mic-slot" id="mic-4"><div class="mic-avatar">🎤</div><div class="mic-label">مايك 5</div></div>
+  </div>
+
+  <!-- Messages -->
+  <div class="messages-area" id="messages-area"></div>
+
+  <!-- Input -->
+  <div class="chat-input-bar">
+    <button class="emoji-btn" onclick="toggleEmojiPicker()">😊</button>
+    <input type="text" id="chat-msg-input" placeholder="اكتب رسالتك..." onkeydown="if(event.key==='Enter') sendMessage()" />
+    <button class="send-btn" onclick="sendMessage()">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M22 2L11 13" stroke="white" stroke-width="2" stroke-linecap="round"/><path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+  <div class="emoji-picker" id="emoji-picker">
+    <span onclick="addEmoji('😂')">😂</span><span onclick="addEmoji('❤️')">❤️</span>
+    <span onclick="addEmoji('🔥')">🔥</span><span onclick="addEmoji('👏')">👏</span>
+    <span onclick="addEmoji('😍')">😍</span><span onclick="addEmoji('🎉')">🎉</span>
+    <span onclick="addEmoji('😎')">😎</span><span onclick="addEmoji('🙏')">🙏</span>
+    <span onclick="addEmoji('💪')">💪</span><span onclick="addEmoji('😊')">😊</span>
+    <span onclick="addEmoji('👍')">👍</span><span onclick="addEmoji('🌹')">🌹</span>
+  </div>
+</div>
+
+<!-- ===================== GAMES TAB ===================== -->
+<div id="screen-games" class="screen">
+  <div class="tab-header">
+    <h2>🎮 الألعاب</h2>
+  </div>
+  <div class="games-body">
+    <div class="game-card" onclick="launchGame()">
+      <div class="game-thumb">🃏</div>
+      <div class="game-info">
+        <div class="game-name">UNO Multiplayer</div>
+        <div class="game-desc">العب UNO أونلاين مع صديقك في نفس اللحظة!</div>
+        <button class="btn-game-play">▶ العب الآن</button>
+      </div>
+    </div>
+    <div class="game-card-features">
+      <div class="feat-item">🔗 <span>شارك الكود مع صديقك</span></div>
+      <div class="feat-item">⚡ <span>لعب مباشر بدون تأخير</span></div>
+      <div class="feat-item">🏆 <span>بطاقات خاصة: Skip / Rev / +2 / +4</span></div>
+    </div>
+    <div class="game-placeholder">
+      <div class="game-ph-icon">🎯</div>
+      <div class="game-ph-text">قريباً... ألعاب جديدة</div>
+    </div>
+  </div>
+  <!-- In-app UNO game iframe -->
+  <div id="game-modal" class="game-modal" style="display:none">
+    <div class="game-modal-header">
+      <span>🃏 UNO Multiplayer</span>
+      <button onclick="closeGame()">✕</button>
+    </div>
+    <iframe id="game-iframe" src="game.html" frameborder="0" style="width:100%;flex:1;border:none;"></iframe>
+  </div>
+  <div class="bottom-nav">
+    <button class="nav-btn" onclick="switchTab('home')">
+      <span class="nav-icon">🏠</span><span class="nav-label">الرئيسية</span>
+    </button>
+    <button class="nav-btn active" onclick="switchTab('games')">
+      <span class="nav-icon">🎮</span><span class="nav-label">الألعاب</span>
+    </button>
+    <button class="nav-btn" onclick="switchTab('profile')">
+      <span class="nav-icon">👤</span><span class="nav-label">بروفايل</span>
+    </button>
+  </div>
+</div>
+
+<!-- ===================== PROFILE TAB ===================== -->
+<div id="screen-profile" class="screen">
+  <div class="tab-header">
+    <h2>👤 بروفايلي</h2>
+  </div>
+  <div class="profile-body">
+    <div class="profile-avatar-wrap">
+      <div class="profile-avatar" id="profile-avatar-display"></div>
+      <button class="change-photo-btn" onclick="document.getElementById('profile-photo-input').click()">📷 تغيير الصورة</button>
+      <input type="file" id="profile-photo-input" accept="image/*" style="display:none" onchange="updateProfilePhoto(this)" />
+    </div>
+    <div class="profile-info-card">
+      <div class="profile-field">
+        <label>الاسم</label>
+        <div class="profile-name-row">
+          <span id="profile-name-display">مستخدم</span>
+          <button class="edit-inline-btn" onclick="toggleEditName()">✏️</button>
+        </div>
+        <div id="profile-name-edit" style="display:none;margin-top:8px">
+          <input type="text" id="profile-name-input" class="profile-input" placeholder="الاسم الجديد" />
+          <button class="btn-save-sm" onclick="saveProfileName()">حفظ</button>
+        </div>
+      </div>
+      <div class="profile-field">
+        <label>البريد الإلكتروني</label>
+        <span id="profile-email-display" class="profile-email">—</span>
+      </div>
+    </div>
+    <button class="btn-logout" onclick="doLogout()">🚪 تسجيل الخروج</button>
+  </div>
+  <div class="bottom-nav">
+    <button class="nav-btn" onclick="switchTab('home')">
+      <span class="nav-icon">🏠</span><span class="nav-label">الرئيسية</span>
+    </button>
+    <button class="nav-btn" onclick="switchTab('games')">
+      <span class="nav-icon">🎮</span><span class="nav-label">الألعاب</span>
+    </button>
+    <button class="nav-btn active" onclick="switchTab('profile')">
+      <span class="nav-icon">👤</span><span class="nav-label">بروفايل</span>
+    </button>
+  </div>
+</div>
+
+<!-- Loading overlay -->
+<div id="loading-overlay" class="loading-overlay" style="display:none">
+  <div class="spinner"></div>
+</div>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
