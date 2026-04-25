@@ -7,13 +7,14 @@
 // ============ FIREBASE CONFIG ============
 // ⚠️  استبدل هذه القيم بمعلومات مشروعك في Firebase Console
 var firebaseConfig = {
-  apiKey: "AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-  authDomain: "your-project.firebaseapp.com",
-  databaseURL: "https://your-project-default-rtdb.firebaseio.com",
-  projectId: "your-project",
-  storageBucket: "your-project.appspot.com",
-  messagingSenderId: "000000000000",
-  appId: "1:000000000000:web:xxxxxxxxxxxxxxxx"
+  apiKey: "AIzaSyCcv6TYBlwM3wdASndMtqncQvJhzztFZ9k",
+  authDomain: "uno-i-t.firebaseapp.com",
+  databaseURL: "https://uno-i-t-default-rtdb.firebaseio.com",
+  projectId: "uno-i-t",
+  storageBucket: "uno-i-t.firebasestorage.app",
+  messagingSenderId: "735333945529",
+  appId: "1:735333945529:web:0de9350fe4d36009224b68",
+  measurementId: "G-NFVJZ0L8DF"
 };
 
 // ============ INIT FIREBASE ============
