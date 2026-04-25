@@ -246,14 +246,12 @@ function loadMessages() {
   messagesRef = db.ref('messages/general');
   var startTs = Date.now();
 
-  // الاستماع للرسائل الجديدة فقط من لحظة الدخول
-  messagesListener = messagesRef.orderByChild('timestamp')
-    .startAt(startTs)
-    .on('child_added', function(snap) {
-      renderMessage(snap.val());
-      scrollToBottom();
-    });
-}
+messagesListener = messagesRef
+  .orderByChild('timestamp')
+  .on('child_added', function(snap) {
+    renderMessage(snap.val());
+    scrollToBottom();
+  });
 
 function renderMessage(msg) {
   if (!msg) return;
