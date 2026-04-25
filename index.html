@@ -2,10 +2,10 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <title>Hala Chat</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>هلا Chat</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -24,8 +24,7 @@
           <circle cx="32" cy="25" r="2" fill="url(#lg1)"/>
           <defs>
             <linearGradient id="lg1" x1="0" y1="0" x2="52" y2="52" gradientUnits="userSpaceOnUse">
-              <stop stop-color="#7C3AED"/>
-              <stop offset="1" stop-color="#EC4899"/>
+              <stop stop-color="#7C3AED"/><stop offset="1" stop-color="#EC4899"/>
             </linearGradient>
           </defs>
         </svg>
@@ -36,10 +35,8 @@
     <button class="btn-primary btn-splash" onclick="showScreen('login')">ابدأ الآن</button>
   </div>
   <div class="splash-bubbles">
-    <div class="bubble b1"></div>
-    <div class="bubble b2"></div>
-    <div class="bubble b3"></div>
-    <div class="bubble b4"></div>
+    <div class="bubble b1"></div><div class="bubble b2"></div>
+    <div class="bubble b3"></div><div class="bubble b4"></div>
   </div>
 </div>
 
@@ -90,9 +87,7 @@
   </div>
   <div class="auth-card">
     <div class="avatar-picker" onclick="document.getElementById('reg-avatar-input').click()">
-      <div class="avatar-preview" id="reg-avatar-preview">
-        <span>📷</span>
-      </div>
+      <div class="avatar-preview" id="reg-avatar-preview"><span>📷</span></div>
       <p class="avatar-hint">اضغط لإضافة صورة</p>
       <input type="file" id="reg-avatar-input" accept="image/*" style="display:none" onchange="previewAvatar(this)" />
     </div>
@@ -134,7 +129,6 @@
     </div>
     <div class="notif-btn">🔔</div>
   </div>
-
   <div class="home-body">
     <div class="section-label">الغرف النشطة</div>
     <div class="room-card" onclick="showScreen('chat')">
@@ -148,7 +142,6 @@
       </div>
       <div class="room-card-arrow">←</div>
     </div>
-
     <div class="section-label" style="margin-top:24px">مرحباً بك في هلا</div>
     <div class="welcome-banner">
       <div class="welcome-emoji">🎉</div>
@@ -158,19 +151,15 @@
       </div>
     </div>
   </div>
-
   <div class="bottom-nav">
-    <button class="nav-btn active" onclick="switchTab('home')">
-      <span class="nav-icon">🏠</span>
-      <span class="nav-label">الرئيسية</span>
+    <button class="nav-btn active" id="nav-home" onclick="switchTab('home')">
+      <span class="nav-icon">🏠</span><span class="nav-label">الرئيسية</span>
     </button>
-    <button class="nav-btn" onclick="switchTab('games')">
-      <span class="nav-icon">🎮</span>
-      <span class="nav-label">الألعاب</span>
+    <button class="nav-btn" id="nav-games" onclick="switchTab('games')">
+      <span class="nav-icon">🎮</span><span class="nav-label">الألعاب</span>
     </button>
-    <button class="nav-btn" onclick="switchTab('profile')">
-      <span class="nav-icon">👤</span>
-      <span class="nav-label">بروفايل</span>
+    <button class="nav-btn" id="nav-profile" onclick="switchTab('profile')">
+      <span class="nav-icon">👤</span><span class="nav-label">بروفايل</span>
     </button>
   </div>
 </div>
@@ -185,10 +174,8 @@
         <div class="chat-room-members"><span id="chat-members-count">0</span> عضو</div>
       </div>
     </div>
-    <button class="leave-btn" onclick="showScreen('home')">خروج ✕</button>
+    <button class="leave-btn" onclick="switchTab('home')">خروج ✕</button>
   </div>
-
-  <!-- Mics -->
   <div class="mics-bar">
     <div class="mic-slot" id="mic-0"><div class="mic-avatar">🎤</div><div class="mic-label">مايك 1</div></div>
     <div class="mic-slot" id="mic-1"><div class="mic-avatar">🎤</div><div class="mic-label">مايك 2</div></div>
@@ -196,11 +183,7 @@
     <div class="mic-slot" id="mic-3"><div class="mic-avatar">🎤</div><div class="mic-label">مايك 4</div></div>
     <div class="mic-slot" id="mic-4"><div class="mic-avatar">🎤</div><div class="mic-label">مايك 5</div></div>
   </div>
-
-  <!-- Messages -->
   <div class="messages-area" id="messages-area"></div>
-
-  <!-- Input -->
   <div class="chat-input-bar">
     <button class="emoji-btn" onclick="toggleEmojiPicker()">😊</button>
     <input type="text" id="chat-msg-input" placeholder="اكتب رسالتك..." onkeydown="if(event.key==='Enter') sendMessage()" />
@@ -224,40 +207,34 @@
     <h2>🎮 الألعاب</h2>
   </div>
   <div class="games-body">
-    <div class="game-card" onclick="launchGame()">
-      <div class="game-thumb">🃏</div>
-      <div class="game-info">
-        <div class="game-name">UNO Multiplayer</div>
-        <div class="game-desc">العب UNO أونلاين مع صديقك في نفس اللحظة!</div>
-        <button class="btn-game-play">▶ العب الآن</button>
+    <!-- UNO Banner -->
+    <div class="uno-banner" onclick="showScreen('uno-lobby')">
+      <div class="uno-banner-deco">
+        <div class="uno-dc" style="background:#e8445a;transform:rotate(-12deg) translateY(6px)">3</div>
+        <div class="uno-dc" style="background:#4a9eff;transform:rotate(-3deg)">★</div>
+        <div class="uno-dc" style="background:#3ecf6a;transform:rotate(5deg) translateY(4px)">7</div>
+        <div class="uno-dc" style="background:#f5c842;color:#222;transform:rotate(14deg) translateY(8px)">+2</div>
+      </div>
+      <div class="uno-banner-info">
+        <div class="uno-banner-title">UNO</div>
+        <div class="uno-banner-sub">العب مع صديق أو ضد الكمبيوتر</div>
+        <div class="uno-banner-btn">▶ العب الآن</div>
       </div>
     </div>
-    <div class="game-card-features">
-      <div class="feat-item">🔗 <span>شارك الكود مع صديقك</span></div>
-      <div class="feat-item">⚡ <span>لعب مباشر بدون تأخير</span></div>
-      <div class="feat-item">🏆 <span>بطاقات خاصة: Skip / Rev / +2 / +4</span></div>
-    </div>
+    <!-- Coming soon -->
     <div class="game-placeholder">
       <div class="game-ph-icon">🎯</div>
       <div class="game-ph-text">قريباً... ألعاب جديدة</div>
     </div>
   </div>
-  <!-- In-app UNO game iframe -->
-  <div id="game-modal" class="game-modal" style="display:none">
-    <div class="game-modal-header">
-      <span>🃏 UNO Multiplayer</span>
-      <button onclick="closeGame()">✕</button>
-    </div>
-    <iframe id="game-iframe" src="game.html" frameborder="0" style="width:100%;flex:1;border:none;"></iframe>
-  </div>
   <div class="bottom-nav">
-    <button class="nav-btn" onclick="switchTab('home')">
+    <button class="nav-btn" id="gnav-home" onclick="switchTab('home')">
       <span class="nav-icon">🏠</span><span class="nav-label">الرئيسية</span>
     </button>
-    <button class="nav-btn active" onclick="switchTab('games')">
+    <button class="nav-btn active" id="gnav-games" onclick="switchTab('games')">
       <span class="nav-icon">🎮</span><span class="nav-label">الألعاب</span>
     </button>
-    <button class="nav-btn" onclick="switchTab('profile')">
+    <button class="nav-btn" id="gnav-profile" onclick="switchTab('profile')">
       <span class="nav-icon">👤</span><span class="nav-label">بروفايل</span>
     </button>
   </div>
@@ -294,15 +271,195 @@
     <button class="btn-logout" onclick="doLogout()">🚪 تسجيل الخروج</button>
   </div>
   <div class="bottom-nav">
-    <button class="nav-btn" onclick="switchTab('home')">
+    <button class="nav-btn" id="pnav-home" onclick="switchTab('home')">
       <span class="nav-icon">🏠</span><span class="nav-label">الرئيسية</span>
     </button>
-    <button class="nav-btn" onclick="switchTab('games')">
+    <button class="nav-btn" id="pnav-games" onclick="switchTab('games')">
       <span class="nav-icon">🎮</span><span class="nav-label">الألعاب</span>
     </button>
-    <button class="nav-btn active" onclick="switchTab('profile')">
+    <button class="nav-btn active" id="pnav-profile" onclick="switchTab('profile')">
       <span class="nav-icon">👤</span><span class="nav-label">بروفايل</span>
     </button>
+  </div>
+</div>
+
+<!-- ===================== UNO LOBBY ===================== -->
+<div id="screen-uno-lobby" class="screen">
+  <div class="uno-lobby-bg"></div>
+  <div class="uno-lobby-content">
+    <button class="back-btn" onclick="switchTab('games')" style="position:absolute;top:44px;right:20px">←</button>
+
+    <div class="uno-lobby-logo">UNO</div>
+    <div class="uno-lobby-sub">iT · MULTIPLAYER</div>
+
+    <!-- Player card -->
+    <div class="uno-player-card">
+      <div class="uno-player-av" id="uno-lobby-av"></div>
+      <div class="uno-player-name" id="uno-lobby-name">مستخدم</div>
+      <div class="uno-player-ready">جاهز للعب ✓</div>
+    </div>
+
+    <!-- Mode selection -->
+    <div class="uno-mode-btns">
+      <button class="uno-mode-btn uno-mode-friend" onclick="showScreen('uno-friend')">
+        <span class="uno-mode-icon">👥</span>
+        <span class="uno-mode-title">دعوة صديق</span>
+        <span class="uno-mode-desc">العب أونلاين مع شخص تعرفه</span>
+      </button>
+      <button class="uno-mode-btn uno-mode-ai" onclick="startAIGame()">
+        <span class="uno-mode-icon">🤖</span>
+        <span class="uno-mode-title">ضد الكمبيوتر</span>
+        <span class="uno-mode-desc">تحدى الذكاء الاصطناعي الآن</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== UNO FRIEND LOBBY ===================== -->
+<div id="screen-uno-friend" class="screen">
+  <div class="uno-lobby-bg"></div>
+  <div style="position:relative;z-index:2;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;padding:50px 24px 32px;">
+    <button class="back-btn" onclick="showScreen('uno-lobby')" style="position:absolute;top:44px;right:20px">←</button>
+    <div class="uno-lobby-logo" style="font-size:38px;margin-bottom:4px">UNO</div>
+    <div class="uno-lobby-sub" style="margin-bottom:28px">مع صديق</div>
+
+    <!-- Create room -->
+    <div class="uno-friend-section">
+      <div class="uno-friend-label">📤 أنشئ غرفة وادعُ صديقك</div>
+      <button class="btn-primary" onclick="unoCreateRoom()" style="margin-top:0">إنشاء غرفة جديدة</button>
+    </div>
+
+    <div class="uno-or-divider"><span>أو</span></div>
+
+    <!-- Join room -->
+    <div class="uno-friend-section">
+      <div class="uno-friend-label">📥 انضم بكود الغرفة</div>
+      <div class="input-wrap" style="background:rgba(255,255,255,0.08)">
+        <span class="inp-icon">🔑</span>
+        <input type="text" id="uno-join-code" placeholder="XXXXXX" maxlength="6"
+          style="letter-spacing:6px;font-size:20px;font-weight:800;direction:ltr"
+          oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')"
+          onkeydown="if(event.key==='Enter') unoJoinRoom()" />
+      </div>
+      <div id="uno-join-error" class="error-msg"></div>
+      <button class="btn-outline" onclick="unoJoinRoom()">انضم الآن ←</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== UNO WAITING ===================== -->
+<div id="screen-uno-waiting" class="screen">
+  <div class="uno-lobby-bg"></div>
+  <div style="position:relative;z-index:2;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;padding:24px;">
+    <div class="uno-lobby-logo" style="font-size:48px;margin-bottom:4px">UNO</div>
+    <div class="uno-lobby-sub" style="margin-bottom:28px">في انتظار صديقك...</div>
+
+    <div class="w-box" style="width:100%">
+      <div class="w-lbl">كود الغرفة</div>
+      <div class="w-code" id="uno-room-code">------</div>
+      <div class="w-copy" onclick="unoCopyLink()"><span>📋</span><span id="uno-copy-lbl">انسخ رابط الدعوة</span></div>
+    </div>
+
+    <div class="w-spin" style="margin:20px 0 10px"></div>
+    <div class="w-txt">شارك الكود مع صديقك وانتظر انضمامه</div>
+
+    <button class="w-cancel" style="margin-top:20px" onclick="unoCancelRoom()">إلغاء</button>
+  </div>
+</div>
+
+<!-- ===================== UNO GAME ===================== -->
+<div id="screen-uno-game" class="screen" style="background:#0f1922">
+  <!-- Top bar -->
+  <div class="uno-topbar">
+    <div style="display:flex;align-items:center;gap:8px">
+      <button class="tb-dot3" onclick="unoExitGame()">···</button>
+      <span class="tb-dir" id="uno-dirlbl">↻</span>
+    </div>
+    <div style="font-size:14px;font-weight:900;color:#fff;font-family:'Nunito',sans-serif;letter-spacing:2px">iT · UNO</div>
+    <div style="display:flex;align-items:center;gap:6px">
+      <span id="uno-game-mode-badge" class="uno-mode-badge">🤖 كمبيوتر</span>
+      <button class="tb-exit" onclick="unoExitGame()">خروج</button>
+    </div>
+  </div>
+
+  <!-- Field -->
+  <div class="uno-field" id="uno-field">
+    <div class="bg-arrow bg-arrow-l" id="uno-barl">↺</div>
+    <div class="bg-arrow bg-arrow-r" id="uno-barr">↻</div>
+
+    <!-- Opponent zone -->
+    <div class="opp-zone">
+      <div class="opp-cards" id="uno-oppcards"></div>
+      <div class="opp-info-row">
+        <div class="opp-timer"><div class="opp-tbar" id="uno-otbar" style="width:10%"></div></div>
+        <div class="opp-dot"></div>
+        <div class="opp-name" id="uno-oppname">الخصم</div>
+        <div class="opp-av" id="uno-oppav">🤖</div>
+        <div class="opp-cnt" id="uno-oppcnt">7</div>
+      </div>
+    </div>
+
+    <!-- Center -->
+    <div class="center-row">
+      <div class="pile-col">
+        <div class="draw-card" id="uno-dpile" onclick="unoHumanDraw()">
+          <div class="it-logo">iT</div>
+          <span class="deck-badge" id="uno-dcnt">52</span>
+        </div>
+        <div class="pile-lbl">اسحب</div>
+      </div>
+      <div class="pile-col">
+        <div class="top-card" id="uno-tcard"></div>
+        <div class="pile-lbl">الكومة</div>
+      </div>
+    </div>
+
+    <!-- Player zone -->
+    <div class="you-zone">
+      <div class="you-av" id="uno-youav">👤</div>
+      <div class="you-info">
+        <div class="you-dot"></div>
+        <div class="you-nm" id="uno-younm">أنت</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info bar -->
+  <div class="info-bar" id="uno-infobar">جاري التحميل...</div>
+
+  <!-- Hand -->
+  <div class="hand-area">
+    <div class="hand-wrap" id="uno-hwrap"></div>
+    <button class="uno-btn" id="uno-unobtn" onclick="unoCallUno()">UNO!</button>
+  </div>
+
+  <!-- Color picker modal -->
+  <div class="modal-ov" id="uno-colmodal">
+    <div class="modal-title">اختر لون البطاقة</div>
+    <div class="col-grid">
+      <div class="col-opt cR" onclick="unoPickColor('R')">أحمر</div>
+      <div class="col-opt cB" onclick="unoPickColor('B')">أزرق</div>
+      <div class="col-opt cG" onclick="unoPickColor('G')">أخضر</div>
+      <div class="col-opt cY" onclick="unoPickColor('Y')" style="color:#1a1a1a">أصفر</div>
+    </div>
+  </div>
+
+  <!-- Win overlay -->
+  <div class="win-ov" id="uno-winov">
+    <div class="win-box">
+      <div class="win-ico" id="uno-winico">🎉</div>
+      <div class="win-t" id="uno-wint">فزت!</div>
+      <div class="win-s" id="uno-wins">أنت البطل</div>
+      <button class="win-btn" onclick="showScreen('uno-lobby')">العب مجدداً</button>
+    </div>
+  </div>
+
+  <!-- Disconnect overlay (online only) -->
+  <div class="disc-ov" id="uno-discov">
+    <div class="disc-ico">📡</div>
+    <div class="disc-t">انقطع الاتصال</div>
+    <div class="disc-s">غادر اللاعب الآخر اللعبة</div>
+    <button class="disc-btn" onclick="showScreen('uno-lobby')">العودة للقائمة</button>
   </div>
 </div>
 
