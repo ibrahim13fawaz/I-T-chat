@@ -1,11 +1,9 @@
-// =============================================
-//  HALA CHAT APP - app.js
-//  Firebase (Auth + Realtime Database)
-//  No ES Modules - runs directly in browser
-// =============================================
+// ==============================================
+//  HALA APP — app.js  (نسخة نظيفة كاملة)
+//  ⚠️  ضع إعدادات Firebase الحقيقية أدناه
+// ==============================================
 
-// ============ FIREBASE CONFIG ============
-// ⚠️  استبدل هذه القيم بمعلومات مشروعك في Firebase Console
+/* ── FIREBASE CONFIG ─────────────────────────── */
 var firebaseConfig = {
   apiKey: "AIzaSyCcv6TYBlwM3wdASndMtqncQvJhzztFZ9k",
   authDomain: "uno-i-t.firebaseapp.com",
@@ -16,7 +14,6 @@ var firebaseConfig = {
   appId: "1:735333945529:web:0de9350fe4d36009224b68",
   measurementId: "G-NFVJZ0L8DF"
 };
-
 firebase.initializeApp(firebaseConfig);
 var auth = firebase.auth();
 var db   = firebase.database();
@@ -265,21 +262,42 @@ function updateHomeUI() {
 }
 
 /* ════════════════════════════════════════════
-   CHAT — فارغة في كل دخول
+   CHAT — فارغة في كل دخول، رسائل جديدة فقط
 ═══════════════════════════════════════════ */
+var chatOpenedAt = 0;   // وقت دخول الغرفة
+var chatSeenKeys = {};  // مفاتيح الرسائل التي عُرضت لتجنب التكرار
+
 function openChat() {
   stopChat();
+
+  // امسح الشاشة
   var area = document.getElementById('messages-area');
   if (area) area.innerHTML = '';
+  chatSeenKeys = {};
 
-  var startTs = Date.now();
+  // سجّل وقت الدخول (نطرح ثانية واحدة هامش أمان مع الخادم)
+  chatOpenedAt = Date.now() - 1000;
+
   chatRef = db.ref('messages/general');
+
+  // استمع للرسائل الجديدة من لحظة الدخول فقط
   chatListener = chatRef
     .orderByChild('timestamp')
-    .startAt(startTs)
+    .startAt(chatOpenedAt)
     .on('child_added', function(snap) {
+      var key = snap.key;
       var msg = snap.val();
-      if (msg) { appendMessage(msg); scrollBottom(); }
+      if (!msg || !msg.timestamp) return;
+
+      // تجاهل الرسائل القديمة جداً (ما قبل دخول المستخدم)
+      if (msg.timestamp < chatOpenedAt) return;
+
+      // تجنب التكرار
+      if (chatSeenKeys[key]) return;
+      chatSeenKeys[key] = true;
+
+      appendMessage(msg);
+      scrollBottom();
     });
 }
 
@@ -320,12 +338,14 @@ function sendMessage() {
   var inp  = document.getElementById('chat-msg-input'); if (!inp) return;
   var text = (inp.value || '').trim(); if (!text) return;
   inp.value = '';
+  // نستخدم Date.now() وليس ServerValue لأن الـ listener يعتمد على client timestamp
+  var ts = Date.now();
   db.ref('messages/general').push({
     uid:         currentUser.uid,
     displayName: (currentUserData && currentUserData.displayName) || 'مستخدم',
     photoURL:    (currentUserData && currentUserData.photoURL)    || '',
     text:        text,
-    timestamp:   Date.now()
+    timestamp:   ts
   });
 }
 
@@ -967,3 +987,339 @@ window.addEventListener('load', function(){
     if(!auth.currentUser) showScreen('splash');
   },1200);
 });
+
+/* ════════════════════════════════════════════
+   🎤 VOICE SYSTEM — WebRTC + Firebase Signaling
+   اضغط على المايك للانضمام، اضغط مرة ثانية للخروج
+═══════════════════════════════════════════ */
+
+var VOICE = {
+  mySlot      : -1,         // رقم المايك الذي أنا عليه (-1 = خارج)
+  localStream : null,       // ميكروفوني
+  peers       : {},         // uid → RTCPeerConnection
+  micRef      : null,       // Firebase ref لمقعدي
+  signalRef   : null,       // Firebase ref للإشارات الواردة
+  muted       : false,
+
+  ICE : { iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' }
+  ]}
+};
+
+/* ─── اضغط على مايك ─── */
+function toggleMic(slotIdx) {
+  if (!currentUser) return;
+
+  // إذا كنت على هذا المايك → اخرج منه
+  if (VOICE.mySlot === slotIdx) {
+    voiceLeaveMic();
+    return;
+  }
+
+  // إذا كنت على مايك آخر → اخرج أولاً
+  if (VOICE.mySlot !== -1) voiceLeaveMic();
+
+  // اطلب إذن الميكروفون
+  navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+    .then(function(stream) {
+      VOICE.localStream = stream;
+      VOICE.mySlot      = slotIdx;
+      VOICE.muted       = false;
+
+      // سجّل نفسك على هذا المايك في Firebase
+      VOICE.micRef = db.ref('voice_mics/' + slotIdx + '/' + currentUser.uid);
+      VOICE.micRef.set({
+        uid         : currentUser.uid,
+        displayName : (currentUserData && currentUserData.displayName) || 'مستخدم',
+        photoURL    : (currentUserData && currentUserData.photoURL)    || '',
+        joinedAt    : Date.now()
+      });
+      VOICE.micRef.onDisconnect().remove();
+
+      voiceToast('🎙️ انضممت للمايك ' + (slotIdx + 1));
+
+      // استمع للإشارات الواردة (offer/answer/ice)
+      VOICE.signalRef = db.ref('voice_signals/' + currentUser.uid);
+      VOICE.signalRef.on('child_added', function(snap) {
+        voiceHandleSignal(snap.val());
+        snap.ref.remove();
+      });
+
+      // اتصل بكل من هو على المايكات الأخرى الآن
+      db.ref('voice_mics').once('value').then(function(snap) {
+        snap.forEach(function(slotSnap) {
+          slotSnap.forEach(function(userSnap) {
+            var u = userSnap.val();
+            if (u && u.uid && u.uid !== currentUser.uid) {
+              voiceCallPeer(u.uid);
+            }
+          });
+        });
+      });
+
+    })
+    .catch(function(err) {
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        voiceToast('❌ يرجى السماح بالمايكروفون من إعدادات المتصفح');
+      } else {
+        voiceToast('⚠️ لا يمكن الوصول للمايكروفون');
+        console.error('Mic error:', err);
+      }
+    });
+}
+
+/* ─── اخرج من المايك ─── */
+function voiceLeaveMic() {
+  var slot = VOICE.mySlot;
+  if (slot === -1) return;
+
+  // أوقف الميكروفون
+  if (VOICE.localStream) {
+    VOICE.localStream.getTracks().forEach(function(t) { t.stop(); });
+    VOICE.localStream = null;
+  }
+
+  // أغلق كل الاتصالات
+  Object.keys(VOICE.peers).forEach(voiceClosePeer);
+
+  // احذف من Firebase
+  if (VOICE.micRef)    { VOICE.micRef.remove();    VOICE.micRef    = null; }
+  if (VOICE.signalRef) { VOICE.signalRef.off();     VOICE.signalRef = null; }
+
+  VOICE.mySlot = -1;
+  VOICE.muted  = false;
+
+  voiceToast('🔇 خرجت من المايك');
+}
+
+/* ─── اتصل بمستخدم آخر ─── */
+function voiceCallPeer(remoteUid) {
+  if (VOICE.peers[remoteUid]) return;
+  var pc = voiceCreatePC(remoteUid);
+  VOICE.peers[remoteUid] = pc;
+
+  if (VOICE.localStream) {
+    VOICE.localStream.getTracks().forEach(function(t) {
+      pc.addTrack(t, VOICE.localStream);
+    });
+  }
+
+  pc.createOffer()
+    .then(function(offer) { return pc.setLocalDescription(offer); })
+    .then(function() {
+      db.ref('voice_signals/' + remoteUid).push({
+        type    : 'offer',
+        sdp     : pc.localDescription.sdp,
+        fromUid : currentUser.uid
+      });
+    })
+    .catch(function(e) { console.warn('offer error', e); });
+}
+
+/* ─── استقبل إشارة ─── */
+function voiceHandleSignal(sig) {
+  if (!sig || !sig.fromUid || !currentUser) return;
+  var remoteUid = sig.fromUid;
+
+  if (sig.type === 'offer') {
+    var pc = VOICE.peers[remoteUid] || voiceCreatePC(remoteUid);
+    VOICE.peers[remoteUid] = pc;
+    if (VOICE.localStream) {
+      VOICE.localStream.getTracks().forEach(function(t) { pc.addTrack(t, VOICE.localStream); });
+    }
+    pc.setRemoteDescription({ type: 'offer', sdp: sig.sdp })
+      .then(function() { return pc.createAnswer(); })
+      .then(function(ans) { return pc.setLocalDescription(ans); })
+      .then(function() {
+        db.ref('voice_signals/' + remoteUid).push({
+          type    : 'answer',
+          sdp     : pc.localDescription.sdp,
+          fromUid : currentUser.uid
+        });
+      })
+      .catch(function(e) { console.warn('answer error', e); });
+
+  } else if (sig.type === 'answer') {
+    var pc2 = VOICE.peers[remoteUid];
+    if (pc2 && pc2.signalingState !== 'stable') {
+      pc2.setRemoteDescription({ type: 'answer', sdp: sig.sdp })
+         .catch(function(e) { console.warn('setRemote error', e); });
+    }
+
+  } else if (sig.type === 'ice' && sig.candidate) {
+    var pc3 = VOICE.peers[remoteUid];
+    if (pc3) {
+      pc3.addIceCandidate(new RTCIceCandidate(sig.candidate))
+         .catch(function(e) { console.warn('ice error', e); });
+    }
+  }
+}
+
+/* ─── أنشئ RTCPeerConnection ─── */
+function voiceCreatePC(remoteUid) {
+  var pc = new RTCPeerConnection(VOICE.ICE);
+
+  pc.onicecandidate = function(e) {
+    if (e.candidate && currentUser) {
+      db.ref('voice_signals/' + remoteUid).push({
+        type      : 'ice',
+        candidate : e.candidate.toJSON(),
+        fromUid   : currentUser.uid
+      });
+    }
+  };
+
+  pc.ontrack = function(e) {
+    voicePlayAudio(remoteUid, e.streams[0]);
+  };
+
+  pc.onconnectionstatechange = function() {
+    if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') {
+      voiceClosePeer(remoteUid);
+    }
+  };
+
+  return pc;
+}
+
+/* ─── شغّل صوت المستخدم الآخر ─── */
+function voicePlayAudio(uid, stream) {
+  var id  = 'voice-audio-' + uid;
+  var old = document.getElementById(id);
+  if (old) { old.srcObject = stream; return; }
+  var audio = document.createElement('audio');
+  audio.id       = id;
+  audio.autoplay = true;
+  audio.srcObject = stream;
+  audio.style.display = 'none';
+  document.body.appendChild(audio);
+}
+
+/* ─── أغلق اتصال واحد ─── */
+function voiceClosePeer(uid) {
+  if (VOICE.peers[uid]) {
+    try { VOICE.peers[uid].close(); } catch(e) {}
+    delete VOICE.peers[uid];
+  }
+  var el = document.getElementById('voice-audio-' + uid);
+  if (el && el.parentNode) el.parentNode.removeChild(el);
+}
+
+/* ─── راقب المايكات في Firebase وحدّث الواجهة ─── */
+function setupVoiceListener() {
+  db.ref('voice_mics').on('value', function(snap) {
+    // جمّع كل المستخدمين على المايكات
+    var occupied = {}; // slotIdx → userData
+    snap.forEach(function(slotSnap) {
+      var idx = parseInt(slotSnap.key);
+      slotSnap.forEach(function(userSnap) {
+        var u = userSnap.val();
+        if (u) occupied[idx] = u;
+      });
+    });
+
+    // حدّث الواجهة لكل المقاعد الـ5
+    for (var i = 0; i < 5; i++) {
+      var slot   = document.getElementById('mic-' + i); if (!slot) continue;
+      var avDiv  = slot.querySelector('.mic-avatar');
+      var lblDiv = slot.querySelector('.mic-label');
+      var u      = occupied[i];
+      var isMe   = u && currentUser && u.uid === currentUser.uid;
+
+      if (u) {
+        slot.classList.add('occupied');
+        slot.style.borderColor = isMe ? '#3ecf6a' : '';
+        slot.style.background  = isMe ? 'rgba(62,207,106,0.15)' : '';
+
+        if (u.photoURL && u.photoURL.length > 10) {
+          avDiv.innerHTML = '<img src="' + u.photoURL +
+            '" style="width:100%;height:100%;object-fit:cover;border-radius:50%" />';
+        } else {
+          avDiv.textContent = (u.displayName || '?').charAt(0);
+        }
+
+        lblDiv.textContent = isMe
+          ? (VOICE.muted ? '🔇 كتم' : '🎙️ ' + (u.displayName || 'أنت'))
+          : u.displayName || 'مستخدم';
+
+        // إذا انضم شخص جديد وأنا على مايك → اتصل به
+        if (!isMe && VOICE.mySlot !== -1 && !VOICE.peers[u.uid]) {
+          voiceCallPeer(u.uid);
+        }
+
+      } else {
+        slot.classList.remove('occupied');
+        slot.style.borderColor = '';
+        slot.style.background  = '';
+        avDiv.innerHTML        = '🎤';
+        lblDiv.textContent     = 'مايك ' + (i + 1);
+      }
+    }
+  });
+}
+
+/* ─── Toast إشعار صغير ─── */
+function voiceToast(msg) {
+  var el = document.createElement('div');
+  el.textContent = msg;
+  el.style.cssText =
+    'position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(10px);' +
+    'background:rgba(15,10,26,0.92);color:#fff;padding:10px 22px;border-radius:22px;' +
+    'font-family:Cairo,sans-serif;font-size:13px;font-weight:600;z-index:99999;' +
+    'border:1px solid rgba(124,58,237,0.4);white-space:nowrap;pointer-events:none;' +
+    'opacity:0;transition:all 0.25s ease;';
+  document.body.appendChild(el);
+  requestAnimationFrame(function() {
+    el.style.opacity   = '1';
+    el.style.transform = 'translateX(-50%) translateY(0)';
+  });
+  setTimeout(function() {
+    el.style.opacity   = '0';
+    el.style.transform = 'translateX(-50%) translateY(10px)';
+    setTimeout(function() { if (el.parentNode) el.parentNode.removeChild(el); }, 300);
+  }, 2500);
+}
+
+/* ─── ربط المايكات بالأحداث عند تحميل الصفحة ─── */
+document.addEventListener('DOMContentLoaded', function() {
+  for (var i = 0; i < 5; i++) {
+    (function(idx) {
+      var slot = document.getElementById('mic-' + idx);
+      if (slot) {
+        slot.style.cursor = 'pointer';
+        slot.title        = 'اضغط للانضمام للمايك';
+        slot.onclick      = function() { toggleMic(idx); };
+      }
+    })(i);
+  }
+});
+
+/* ─── شغّل مستمع الصوت بعد تسجيل الدخول ─── */
+var _voiceStarted = false;
+var _origSetupMembers = setupMembersListener;
+setupMembersListener = function() {
+  _origSetupMembers();
+  if (!_voiceStarted) {
+    _voiceStarted = true;
+    setupVoiceListener();
+  }
+};
+
+/* ─── نظّف الصوت عند تسجيل الخروج ─── */
+var _origDoLogout = doLogout;
+doLogout = function() {
+  voiceLeaveMic();
+  _voiceStarted = false;
+  _origDoLogout();
+};
+
+/* ─── CSS للمايكات ─── */
+(function() {
+  var s = document.createElement('style');
+  s.textContent =
+    '.mic-slot { transition: border-color 0.3s, background 0.3s, box-shadow 0.3s !important; }' +
+    '.mic-slot.occupied { box-shadow: 0 0 10px rgba(124,58,237,0.3); }' +
+    '.mic-slot:active { transform: scale(0.93); }';
+  document.head.appendChild(s);
+})();
