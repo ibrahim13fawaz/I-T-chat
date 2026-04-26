@@ -33,20 +33,35 @@ var regAvatarDataUrl = null;
    NAVIGATION
 ═══════════════════════════════════════════ */
 function showScreen(id) {
+  // أخفِ كل الشاشات
   document.querySelectorAll('.screen').forEach(function(s) {
     s.classList.remove('active');
+    s.style.display = 'none';
   });
+  // أظهر الشاشة المطلوبة
   var el = document.getElementById('screen-' + id);
-  if (el) el.classList.add('active');
+  if (el) {
+    el.classList.add('active');
+    el.style.display = 'flex';
+  }
 }
 
 function switchTab(tab) {
-  ['home','games','profile','chat'].forEach(function(t) {
+  // أخفِ التبويبات الرئيسية فقط
+  ['home','games','profile','chat',
+   'uno-lobby','uno-friend','uno-waiting','uno-game'].forEach(function(t) {
     var el = document.getElementById('screen-' + t);
-    if (el) el.classList.remove('active');
+    if (el) {
+      el.classList.remove('active');
+      el.style.display = 'none';
+    }
   });
+  // أظهر التبويب المطلوب
   var el = document.getElementById('screen-' + tab);
-  if (el) el.classList.add('active');
+  if (el) {
+    el.classList.add('active');
+    el.style.display = 'flex';
+  }
   if (tab === 'chat') openChat();
 }
 
@@ -118,9 +133,8 @@ auth.onAuthStateChanged(function(user) {
       updateProfileUI();
       showScreen('home');
     }).catch(function(e) {
-      // حتى لو فشل قراءة البيانات، اعرض الصفحة الرئيسية
       console.warn('userData read error:', e);
-      currentUserData = { displayName: user.email.split('@')[0], photoURL: '' };
+      currentUserData = { displayName: user.email ? user.email.split('@')[0] : 'مستخدم', photoURL: '' };
       setPresence(true);
       setupMembersListener();
       updateHomeUI();
@@ -1012,16 +1026,35 @@ function unoExitGame()     { UNO.cleanup(); showScreen('uno-lobby'); }
 })();
 
 window.addEventListener('load', function(){
-  var params=new URLSearchParams(window.location.search);
-  var unoRoom=params.get('unoroom');
-  if(unoRoom&&currentUser){
-    var inp=document.getElementById('uno-join-code');
-    if(inp) inp.value=unoRoom.toUpperCase();
-    UNO.joinRoom(unoRoom.toUpperCase());
+  // أخفِ كل الشاشات أولاً
+  document.querySelectorAll('.screen').forEach(function(s) {
+    s.style.display = 'none';
+    s.classList.remove('active');
+  });
+
+  // أظهر splash مباشرة
+  var splash = document.getElementById('screen-splash');
+  if (splash) {
+    splash.style.display = 'flex';
+    splash.classList.add('active');
   }
-  setTimeout(function(){
-    if(!auth.currentUser) showScreen('splash');
-  },1200);
+
+  // إذا كان المستخدم مسجلاً دخوله، auth.onAuthStateChanged سيتعامل معه
+
+  // auto-join uno room from URL
+  var params  = new URLSearchParams(window.location.search);
+  var unoRoom = params.get('unoroom');
+  if (unoRoom) {
+    // انتظر حتى يتسجّل الدخول ثم انضم
+    var unsubscribe = auth.onAuthStateChanged(function(user) {
+      if (user && unoRoom) {
+        unsubscribe();
+        var inp = document.getElementById('uno-join-code');
+        if (inp) inp.value = unoRoom.toUpperCase();
+        setTimeout(function() { UNO.joinRoom(unoRoom.toUpperCase()); }, 500);
+      }
+    });
+  }
 });
 
 /* ════════════════════════════════════════════
