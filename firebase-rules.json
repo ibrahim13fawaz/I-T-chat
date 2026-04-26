@@ -14,15 +14,15 @@
       }
     },
     "presence": {
+      ".read": "auth != null",
       "$uid": {
-        ".read": "auth != null",
         ".write": "auth != null && auth.uid === $uid"
       }
     },
     "voice_mics": {
+      ".read": "auth != null",
       "$slot": {
         "$uid": {
-          ".read": "auth != null",
           ".write": "auth != null && auth.uid === $uid"
         }
       }
